@@ -19,9 +19,15 @@ internal static class Program
     private const uint ModNoRepeat = 0x4000;
     private const uint InvalidScreenshot = 0xFFFFFFFF;
 
-    private static readonly string DataDir = Path.Combine(AppContext.BaseDirectory, "data");
+    // Per-user data, never next to the exe: the program may live somewhere the
+    // user cannot write (Program Files), and failing to create a log directory
+    // is a terrible reason for a tray app to die silently.
+    private static readonly string DataDir = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "SteamScreenshotBridge");
     private static readonly string LogPath = Path.Combine(DataDir, "steam-screenshot-bridge.log");
-    private static readonly string ConfigPath = Path.Combine(AppContext.BaseDirectory, "config.ini");
+    private static readonly string ConfigPath = Path.Combine(DataDir, "config.ini");
+    private static readonly string ShippedConfig = Path.Combine(AppContext.BaseDirectory, "config.ini");
     private static readonly List<SteamGame> Games = LoadSteamGames();
     private static int _capturing;
     private static string? _steamApi;
@@ -29,19 +35,44 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
+        try { Run(); }
+        catch (Exception ex)
+        {
+            // A WinForms app that throws during startup vanishes without a word,
+            // which leaves nothing to debug. Say something instead.
+            Log("FATAL " + ex);
+            MessageBox.Show(ex.ToString(), "Steam Screenshot Bridge failed to start",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private static void Run()
+    {
         // The game is on a high-DPI display. Without per-monitor awareness,
         // Win32 window coordinates and CopyFromScreen pixels use different scales.
         Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
         Directory.CreateDirectory(DataDir);
         using var single = new Mutex(true, @"Local\SteamScreenshotBridge", out bool first);
-        if (!first) return;
+        if (!first)
+        {
+            Log("already running; this instance is exiting");
+            MessageBox.Show("Steam Screenshot Bridge is already running — look for its tray icon.",
+                "Steam Screenshot Bridge", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
 
         var hotkeyConfig = LoadHotkey();
 
         using var hotkey = new HotkeyWindow();
         if (!RegisterHotKey(hotkey.Handle, 1, hotkeyConfig.Modifiers | ModNoRepeat, hotkeyConfig.VirtualKey))
         {
-            Log($"FAIL RegisterHotKey {hotkeyConfig.Display}: " + Marshal.GetLastWin32Error());
+            var err = Marshal.GetLastWin32Error();
+            Log($"FAIL RegisterHotKey {hotkeyConfig.Display}: " + err);
+            MessageBox.Show(
+                $"Could not register the hotkey {hotkeyConfig.Display} (error {err}).\n\n" +
+                "Another program is probably already using it. Pick a different key in\n" +
+                ConfigPath,
+                "Steam Screenshot Bridge", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         using var trayIcon = CreateTrayIconImage();
@@ -83,7 +114,13 @@ internal static class Program
         const string fallback = "F10";
         try
         {
-            if (!File.Exists(ConfigPath)) File.WriteAllText(ConfigPath, "hotkey=F10\n");
+            if (!File.Exists(ConfigPath))
+            {
+                // First run: seed the per-user config from the documented one
+                // shipped next to the exe, so the key list is there to read.
+                if (File.Exists(ShippedConfig)) File.Copy(ShippedConfig, ConfigPath);
+                else File.WriteAllText(ConfigPath, "hotkey=F10\n");
+            }
             var setting = File.ReadLines(ConfigPath)
                 .Select(line => line.Trim())
                 .FirstOrDefault(line => !line.StartsWith(';') && !line.StartsWith('#') &&

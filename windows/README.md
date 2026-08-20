@@ -97,7 +97,8 @@ own exe.
 ## Changing the hotkey
 
 Tray menu → **Open configuration** → edit the `hotkey=` line → save → restart the
-bridge. `config.ini` lists every accepted key and modifier name.
+bridge. The file lists every accepted key and modifier name, and lives in
+`%LOCALAPPDATA%\SteamScreenshotBridge\config.ini`.
 
 ```ini
 hotkey=F10
@@ -114,5 +115,13 @@ hotkey=F10
 | `install.ps1` / `uninstall.ps1` | startup shortcut management |
 | `steam-f10.ico` | application/tray icon |
 
-Runtime data (log, config copy) lives under the per-user application data
-directory; nothing is written outside your profile.
+## Where things live
+
+| | |
+|---|---|
+| the folder you unzipped | the program itself — the startup shortcut points here |
+| `%LOCALAPPDATA%\SteamScreenshotBridge\config.ini` | your hotkey setting |
+| `%LOCALAPPDATA%\SteamScreenshotBridge\steam-screenshot-bridge.log` | log |
+
+Nothing is written next to the exe, so installing under `Program Files` or any
+other read-only location works fine.
