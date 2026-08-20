@@ -27,6 +27,12 @@ Requires the .NET 8 SDK.
 dotnet publish -c Release
 ```
 
+Produces `bin\Release\net8.0-windows\win-x64\publish\SteamScreenshotBridge.exe`,
+which is what `install.ps1` looks for.
+
+Building from macOS or Linux works too (you just cannot run the result) — add
+`-p:EnableWindowsTargeting=true`.
+
 ### steam_api64.dll
 
 Steam for Windows does not ship `steam_api64.dll` itself — it is the Steamworks

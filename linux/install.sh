@@ -1,4 +1,12 @@
 #!/bin/bash
+# Steam Screenshot Bridge
+# Copyright (C) 2026
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version. See the LICENSE file for details.
+
 # Install the Steam Screenshot Bridge for the current user.
 #
 # Everything lands under $HOME -- no root, and nothing on the read-only SteamOS

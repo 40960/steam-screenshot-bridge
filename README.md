@@ -46,3 +46,7 @@ grep "GameOverlay: started" ~/.local/share/Steam/logs/console_log.txt
 
 The Steam Overlay stays disabled for these games — only the publisher can clear
 that flag. This restores the screenshots, not the overlay.
+
+## License
+
+GNU Affero General Public License v3.0 or later. See [LICENSE](LICENSE).
