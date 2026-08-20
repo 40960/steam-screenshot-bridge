@@ -48,18 +48,29 @@ If you would rather not have it search (or you hit an unusual setup), copy
 Finish and save whatever you are playing first — the helper is deliberately not
 auto-started while a game is active.
 
+**Double-click `install.bat`.** It runs the PowerShell installer with a
+per-process execution-policy bypass, so you do not have to change any machine
+setting. (`.ps1` files refuse to run by default on a stock Windows install.)
+
+That creates a per-user startup shortcut and launches the silent helper, then
+checks that it is actually running. A tray icon appears with the current hotkey;
+its menu opens the configuration or exits. It starts automatically at every
+logon from then on.
+
+Double-click `uninstall.bat` to stop it and remove the startup shortcut.
+
+If you prefer to run the scripts yourself:
+
 ```powershell
-.\install.ps1
+powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-That creates a per-user startup shortcut and launches the silent helper. A tray
-icon appears with the current hotkey; its menu opens the configuration or exits.
+### Which download
 
-```powershell
-.\uninstall.ps1
-```
-
-stops it and removes the startup shortcut.
+| | |
+|---|---|
+| **self-contained** | Nothing else to install. Bigger. Use this if unsure. |
+| **framework-dependent** | ~180 KB, but needs the [.NET 8 Desktop Runtime (x64)](https://dotnet.microsoft.com/download/dotnet/8.0). Without it the program exits instantly and no tray icon appears. |
 
 ## Changing the hotkey
 

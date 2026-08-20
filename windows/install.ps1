@@ -17,4 +17,23 @@ $link.WindowStyle = 7
 $link.IconLocation = "$exe,0"
 $link.Save()
 Start-Process -FilePath $exe -WindowStyle Hidden
-Write-Host 'Installed. Steam Screenshot Bridge is now running for installed Steam games.'
+
+# A framework-dependent build exits immediately when the .NET Desktop Runtime is
+# missing, so confirm it is actually running instead of claiming success.
+Start-Sleep -Seconds 3
+$running = Get-Process -Name 'SteamScreenshotBridge' -ErrorAction SilentlyContinue
+if ($running) {
+    Write-Host 'Installed. Steam Screenshot Bridge is running; look for the tray icon.'
+    Write-Host 'It will start automatically when you log in.'
+}
+else {
+    Write-Warning 'The bridge was installed but is not running.'
+    Write-Host ''
+    Write-Host 'The usual cause is a missing runtime for this (framework-dependent) build.'
+    Write-Host 'Either install the .NET 8 Desktop Runtime (x64):'
+    Write-Host '  https://dotnet.microsoft.com/download/dotnet/8.0'
+    Write-Host 'or download the self-contained build instead, which needs no runtime.'
+    Write-Host ''
+    Write-Host 'To see the actual error, run the exe directly from this window:'
+    Write-Host "  & '$exe'"
+}
