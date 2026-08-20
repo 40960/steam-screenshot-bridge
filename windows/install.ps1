@@ -1,7 +1,12 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$exe = Join-Path $root 'bin\Release\net8.0-windows\win-x64\publish\SteamScreenshotBridge.exe'
-if (-not (Test-Path -LiteralPath $exe)) { throw "Build not found: $exe" }
+# A release download has the exe next to this script; a source build leaves it
+# in the publish folder.
+$exe = Join-Path $root 'SteamScreenshotBridge.exe'
+if (-not (Test-Path -LiteralPath $exe)) {
+    $exe = Join-Path $root 'bin\Release\net8.0-windows\win-x64\publish\SteamScreenshotBridge.exe'
+}
+if (-not (Test-Path -LiteralPath $exe)) { throw "SteamScreenshotBridge.exe not found: build it, or run this next to the exe" }
 $startup = [Environment]::GetFolderPath('Startup')
 $shortcut = Join-Path $startup 'Steam Screenshot Bridge.lnk'
 $shell = New-Object -ComObject WScript.Shell
