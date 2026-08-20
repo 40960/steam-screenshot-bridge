@@ -1,0 +1,63 @@
+#!/bin/bash
+# Steam screenshot bridge.
+# Captures the focused Steam game window and registers it in the Steam
+# screenshot library under that game's AppID, via ISteamScreenshots.
+# Needed for games whose Steam app metadata sets DisableOverlay,
+# where the normal F12 overlay capture never works.
+#
+# Only uses tools that ship in the SteamOS base image (ffmpeg, xdotool, xprop),
+# so a SteamOS update -- which replaces the read-only root -- won't break it.
+
+exec 9>/tmp/ks-shot.lock
+flock -n 9 || exit 0
+
+export DISPLAY=${DISPLAY:-:0}
+if [ -z "$XAUTHORITY" ]; then
+  XA=$(pgrep -a kwin_wayland | grep -oE "xwayland-xauthority [^ ]+" | head -1 | awk '{print $2}')
+  [ -n "$XA" ] && export XAUTHORITY="$XA"
+fi
+
+LOG=$HOME/.local/share/ks-shot.log
+TMPDIR=/tmp/ks-shot
+mkdir -p "$TMPDIR"
+
+note(){ echo "$(date '+%F %T') $*" >> "$LOG"; }
+fail(){ note "FAIL: $*"; command -v notify-send >/dev/null && notify-send -a "Steam Screenshot" -i dialog-error "截图失败" "$*"; exit 1; }
+
+WID=$(xdotool getactivewindow 2>/dev/null)
+[ -z "$WID" ] && fail "没有活动窗口"
+
+APPID=$(xprop -id "$WID" WM_CLASS 2>/dev/null | grep -oE "steam_app_[0-9]+" | head -1 | grep -oE "[0-9]+")
+if [ -z "$APPID" ]; then
+  APPID=$(pgrep -af "reaper SteamLaunch AppId=" 2>/dev/null | grep -oE "AppId=[0-9]+" | head -1 | cut -d= -f2)
+fi
+if [ -z "$APPID" ]; then
+  note "skip: focused window is not a Steam game (wid=$WID)"
+  exit 0
+fi
+
+eval "$(xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+[ -z "$WIDTH" ] || [ -z "$HEIGHT" ] && fail "拿不到窗口尺寸"
+# x11grab needs even dimensions for some encoders; jpeg is fine but keep it tidy
+W=$(( WIDTH - WIDTH % 2 ))
+H=$(( HEIGHT - HEIGHT % 2 ))
+
+TS=$(date +%Y%m%d%H%M%S)
+IMG="$TMPDIR/${APPID}_${TS}.jpg"
+
+ffmpeg -hide_banner -loglevel error -f x11grab -window_id "$WID" \
+       -video_size "${W}x${H}" -i "$DISPLAY" -frames:v 1 -q:v 2 -y "$IMG" 2>>"$LOG" \
+  || fail "抓图失败 (wid=$WID)"
+[ -s "$IMG" ] || fail "抓图为空"
+
+OUT=$(python3 "$(dirname "$0")/steamshot.py" "$APPID" "$IMG" "$W" "$H" 2>&1)
+RC=$?
+note "appid=$APPID wid=$WID ${W}x${H} img=$IMG rc=$RC out=$(echo "$OUT" | tail -1)"
+
+if [ $RC -eq 0 ]; then
+  command -v notify-send >/dev/null && notify-send -a "Steam Screenshot" -i camera-photo -t 1500 "已保存到 Steam 媒体库" "AppID $APPID"
+  find "$TMPDIR" -name "*.jpg" -mtime +1 -delete 2>/dev/null
+  exit 0
+fi
+
+fail "$(echo "$OUT" | tail -1)"

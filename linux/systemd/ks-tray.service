@@ -1,0 +1,13 @@
+[Unit]
+Description=Steam Screenshot Bridge tray
+After=graphical-session.target
+
+[Service]
+Type=simple
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/python3 %h/.local/share/steam-screenshot-bridge/ks-tray.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

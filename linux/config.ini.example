@@ -1,0 +1,32 @@
+; Steam Screenshot Bridge configuration
+; Change the value after hotkey=, then pick "重新加载热键" in the tray menu.
+;
+; Examples:
+;   hotkey=F10
+;   hotkey=Control+Alt+s
+;   hotkey=Scroll_Lock
+;   hotkey=Shift+Print
+;
+; Modifier names:
+;   Control, Alt, Shift, Mod4 (Super/Windows key)
+;   Join them with + , e.g. Control+Alt+s
+;
+; Key names are X keysyms. Common ones:
+;   F1 ... F12
+;   a ... z          (lower case; use Shift+a for upper case)
+;   0 ... 9
+;   Escape, Tab, space, BackSpace, Return,
+;   Insert, Delete, Home, End, Prior (PageUp), Next (PageDown),
+;   Left, Right, Up, Down, Print, Pause, Scroll_Lock, Menu
+;   KP_0 ... KP_9, KP_Add, KP_Subtract, KP_Multiply, KP_Divide
+;
+; Full list: run `xev` in a terminal and press the key you want.
+;
+; NOTE for SteamOS desktop mode (Wayland):
+;   A bare key such as F10 is reliably caught when it comes from Steam Input
+;   (i.e. a controller back button mapped to that key). A bare key pressed on a
+;   physical keyboard may not reach this grabber, because kwin delivers most
+;   plain keys straight to the focused window. A Control+Alt combination works
+;   for both cases, so use one of those if you also want a keyboard shortcut.
+
+hotkey=F10
