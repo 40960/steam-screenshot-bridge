@@ -74,6 +74,19 @@ If you prefer to run the scripts yourself:
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
+### "Windows protected your PC"
+
+This program is not code-signed — a certificate costs money and this is a small
+free tool — so SmartScreen flags it as an unrecognised app.
+
+`install.bat` clears the downloaded-file mark for you, which normally avoids the
+prompt. If you still see it, click **More info → Run anyway** once; Windows
+remembers the choice.
+
+If you would rather not trust a binary from a stranger, that is reasonable:
+build it yourself from this source in one command (see Build above) and run your
+own exe.
+
 ### Which download
 
 | | |
