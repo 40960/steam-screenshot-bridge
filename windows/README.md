@@ -48,9 +48,18 @@ If you would rather not have it search (or you hit an unusual setup), copy
 Finish and save whatever you are playing first — the helper is deliberately not
 auto-started while a game is active.
 
-**Double-click `install.bat`.** It runs the PowerShell installer with a
-per-process execution-policy bypass, so you do not have to change any machine
-setting. (`.ps1` files refuse to run by default on a stock Windows install.)
+**Unzip somewhere permanent, then double-click `install.bat`.**
+
+The folder you unzip to *is* the install location — the startup shortcut points
+straight at that exe, so don't unzip to a temp folder and delete it afterwards.
+
+`install.bat` runs the PowerShell installer with a per-process execution-policy
+bypass, so you do not have to change any machine setting. (`.ps1` files refuse
+to run by default on a stock Windows install.)
+
+Upgrading: unzip the new version, run its `install.bat`. It stops the old copy
+and repoints the startup shortcut at the new exe; the old folder can then be
+deleted.
 
 That creates a per-user startup shortcut and launches the silent helper, then
 checks that it is actually running. A tray icon appears with the current hotkey;
