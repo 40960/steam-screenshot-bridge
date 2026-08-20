@@ -11,6 +11,13 @@ if (-not (Test-Path -LiteralPath $exe)) { throw "SteamScreenshotBridge.exe not f
 # this exe, so do not extract to a temporary folder and delete it afterwards.
 Write-Host "Installing from: $(Split-Path -Parent $exe)"
 
+# Files extracted from a downloaded zip carry the Mark-of-the-Web, which makes
+# SmartScreen block this unsigned program with "Windows protected your PC".
+# Clearing the mark on the files we just shipped avoids that.
+Get-ChildItem -LiteralPath $root -File -ErrorAction SilentlyContinue |
+    Unblock-File -ErrorAction SilentlyContinue
+Unblock-File -LiteralPath $exe -ErrorAction SilentlyContinue
+
 # Upgrading over an older copy: stop it first. The program is single-instance,
 # so a leftover process would keep the new one from starting at all.
 $old = Get-Process -Name 'SteamScreenshotBridge' -ErrorAction SilentlyContinue
@@ -42,11 +49,18 @@ if ($running) {
 else {
     Write-Warning 'The bridge was installed but is not running.'
     Write-Host ''
-    Write-Host 'The usual cause is a missing runtime for this (framework-dependent) build.'
-    Write-Host 'Either install the .NET 8 Desktop Runtime (x64):'
-    Write-Host '  https://dotnet.microsoft.com/download/dotnet/8.0'
-    Write-Host 'or download the self-contained build instead, which needs no runtime.'
+    Write-Host 'Two things cause this:'
     Write-Host ''
-    Write-Host 'To see the actual error, run the exe directly from this window:'
+    Write-Host '1. SmartScreen blocked it. This program is not code-signed, so Windows'
+    Write-Host '   may show "Windows protected your PC" and refuse to start it. Run the'
+    Write-Host '   exe below by hand once, choose "More info" then "Run anyway", and'
+    Write-Host '   Windows will remember the choice.'
+    Write-Host ''
+    Write-Host '2. Only for the framework-dependent build: the .NET 8 Desktop Runtime'
+    Write-Host '   (x64) is missing. Get it from'
+    Write-Host '   https://dotnet.microsoft.com/download/dotnet/8.0'
+    Write-Host '   or use the self-contained build, which needs no runtime.'
+    Write-Host ''
+    Write-Host 'Run this to see which one it is:'
     Write-Host "  & '$exe'"
 }
