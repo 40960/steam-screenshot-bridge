@@ -3,7 +3,7 @@
 Gets Steam screenshots working for games that have **DisableOverlay** set in
 their Steam app metadata, where `F12` and `Shift+Tab` do nothing and never will.
 
-Tested on SteamOS desktop mode (KDE Plasma 6 + `kwin_wayland`) on ROG Ally X.
+Tested on SteamOS desktop mode (KDE Plasma 6 + `kwin_wayland`) on ROG Xbox Ally.
 
 ## What it does
 

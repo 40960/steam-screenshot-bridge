@@ -20,7 +20,7 @@ Nothing here modifies, injects into, or restarts Steam or the game.
 
 | | |
 |---|---|
-| [`linux/`](linux/) | SteamOS / KDE Plasma. Tested on ROG Ally X running SteamOS desktop mode. |
+| [`linux/`](linux/) | SteamOS / KDE Plasma. Tested on ROG Xbox Ally running SteamOS desktop mode. |
 | [`windows/`](windows/) | Windows 11. C# / WinForms tray helper, same approach. |
 
 ## How to tell if this is your problem
